@@ -13,7 +13,7 @@ def check_ffmpeg() -> bool:
                              text=True).returncode == 0)
 
 
-def compress_video(input_file: str, output_file: str, crf: int = 23, force_overwrite: bool = False) -> bool:
+def compress_video(input_file: str, output_file: str = '', crf: int = 23, force_overwrite: bool = False) -> bool:
     """
     Compress video using FFmpeg with libx264 codec
 
@@ -31,6 +31,10 @@ def compress_video(input_file: str, output_file: str, crf: int = 23, force_overw
         if not Path(input_file).is_file():
             raise FileNotFoundError(f"Input file not found: {input_file}")
 
+        if not output_file or output_file == input_file:
+            # Default output file name
+            output_file = f"compressed_{Path(input_file).stem}.mp4"
+
         # Build FFmpeg command
         cmd = ["ffmpeg"]
         if force_overwrite:
@@ -43,6 +47,7 @@ def compress_video(input_file: str, output_file: str, crf: int = 23, force_overw
         ]
 
         # Run FFmpeg command
+        print("\nRunning command:", " ".join(cmd))
         result = subprocess.run(
             cmd,
             stdout=sys.stdout,
