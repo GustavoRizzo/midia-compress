@@ -6,7 +6,6 @@
 __pycache__/
 *.py[cod]
 *$py.class
-./scr/midia_compress/__pycache__/
 
 # C extensions
 *.so
