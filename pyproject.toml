@@ -2,7 +2,7 @@
 authors = [
   {name = "Gustavo Rizzo S M de Albuquerque", email = "grizzo.albu@gmail.com"},
 ]
-dependencies = []
+dependencies = ["imageio-ffmpeg (>=0.6.0,<0.7.0)"]
 description = ""
 name = "midia-compress"
 readme = "README.md"
