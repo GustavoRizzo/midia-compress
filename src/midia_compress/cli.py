@@ -6,14 +6,14 @@ from midia_compress.utils.video import check_ffmpeg, compress_video
 
 app = typer.Typer(help="📹 Media Compressor - FFmpeg-based video compression tool")
 
-def handle_missing_ffmpeg():
+def show_ffmpeg_missing_message():
     """Show error message and exit if FFmpeg is missing"""
     typer.secho("❌ FFmpeg is not installed or not in PATH.", fg=typer.colors.RED, bold=True)
     typer.echo("Please install FFmpeg before continuing:")
     typer.secho("  Download: https://ffmpeg.org/download.html", fg=typer.colors.BLUE)
     raise typer.Exit(code=1)
 
-def ask_directory() -> Path:
+def prompt_directory() -> Path:
     """Prompt user for directory selection"""
     typer.echo("\n📂 Select working directory:")
     current_dir = Path.cwd()
@@ -34,22 +34,22 @@ def ask_directory() -> Path:
         typer.secho("Invalid choice. Using current directory.", fg=typer.colors.YELLOW)
         return current_dir
 
-def ask_compress_quality() -> int:
+def prompt_crf_quality() -> int:
     """Prompt user for compression quality (CRF) with validation"""
     while True:
         crf = typer.prompt(
-        "\n🎚️  Video Compression Quality\n"
-        "┌──────────────────────────────────────┐\n"
-        "│ CRF Range: 18-28                     │\n"
-        "│                                      │\n"
-        "│   18-20: Lossless (large files)      │\n"
-        "│   21-25: Excellent (recommended)     │\n"
-        "│   25-28: Moderate (small files)      │\n"
-        "└──────────────────────────────────────┘\n"
-        "\nEnter CRF value",
-        default=23,
-        show_default=True
-    )
+            "\n🎚️  Video Compression Quality\n"
+            "┌──────────────────────────────────────┐\n"
+            "│ CRF Range: 18-28                     │\n"
+            "│                                      │\n"
+            "│   18-20: Lossless (large files)      │\n"
+            "│   21-25: Excellent (recommended)     │\n"
+            "│   25-28: Moderate (small files)      │\n"
+            "└──────────────────────────────────────┘\n"
+            "\nEnter CRF value",
+            default=23,
+            show_default=True
+        )
 
         if 18 <= crf <= 28:
             return crf
@@ -72,12 +72,12 @@ def compress(
     )
 ):
     """Compress all MP4 videos in directory"""
-    # Verify FFmpeg
+    # Check FFmpeg
     if not check_ffmpeg():
-        handle_missing_ffmpeg()
+        show_ffmpeg_missing_message()
 
     # Select directory
-    working_dir = ask_directory()
+    working_dir = prompt_directory()
     typer.secho(f"\n🔍 Searching for MP4 files in: {working_dir}", fg=typer.colors.CYAN)
 
     # List files
@@ -92,7 +92,7 @@ def compress(
         typer.echo(f"  {i}. {video}")
 
     # Ask for compression quality
-    crf = ask_compress_quality()
+    crf = prompt_crf_quality()
 
     # Process files
     with typer.progressbar(videos, label="Compressing") as progress:
