@@ -1,14 +1,65 @@
-import imageio_ffmpeg
+import subprocess
+import shutil
+import sys
 
-def check_ffmpeg() -> tuple[bool, str]:
+from pathlib import Path
+
+
+def check_ffmpeg() -> bool:
+    """Check if FFmpeg is installed and working by testing 'ffmpeg -version'."""
+    return (shutil.which("ffmpeg") is not None
+            and subprocess.run(["ffmpeg", "-version"],
+                             capture_output=True,
+                             text=True).returncode == 0)
+
+
+def compress_video(input_file: str, output_file: str, crf: int = 23, force_overwrite: bool = False) -> bool:
     """
-    Check if ffmpeg is installed internally on the system.
+    Compress video using FFmpeg with libx264 codec
+
+    Args:
+        input_file: Path to input video file
+        output_file: Path for output video
+        crf: Quality factor (18-28, lower=better quality)
+        force_overwrite: If True, pass '-y' to FFmpeg to overwrite output file
+
     Returns:
-        tuple: A tuple containing a boolean indicating if ffmpeg is installed,
-               and the path to the ffmpeg executable if it is installed.
+        bool: True if successful, False if failed
     """
     try:
-        path = imageio_ffmpeg.get_ffmpeg_exe()
-        return (True, path)
+        # Validate input file exists
+        if not Path(input_file).is_file():
+            raise FileNotFoundError(f"Input file not found: {input_file}")
+
+        # Build FFmpeg command
+        cmd = ["ffmpeg"]
+        if force_overwrite:
+            cmd.append("-y")
+        cmd += [
+            "-i", input_file,
+            "-vcodec", "libx264",
+            "-crf", str(crf),
+            output_file
+        ]
+
+        # Run FFmpeg command
+        result = subprocess.run(
+            cmd,
+            stdout=sys.stdout,
+            stderr=sys.stderr,
+            check=True
+        )
+
+
+        # Verify output was created
+        if not Path(output_file).is_file():
+            raise RuntimeError("FFmpeg ran but output file wasn't created")
+
+        return True
+
+    except subprocess.CalledProcessError as e:
+        print(f"FFmpeg error: {e.stderr}")
     except Exception as e:
-        return (False, None)
+        print(f"Error: {str(e)}")
+
+    return False
