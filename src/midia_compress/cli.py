@@ -38,12 +38,18 @@ def ask_compress_quality() -> int:
     """Prompt user for compression quality (CRF) with validation"""
     while True:
         crf = typer.prompt(
-            "Enter compression quality (CRF 18-28)\n"
-            "└── Lower values = better quality (23 is recommended)\n"
-            "> ",
-            default=23,
-            type=int
-        )
+        "\n🎚️  Video Compression Quality\n"
+        "┌──────────────────────────────────────┐\n"
+        "│ CRF Range: 18-28                     │\n"
+        "│                                      │\n"
+        "│   18-20: Lossless (large files)      │\n"
+        "│   21-25: Excellent (recommended)     │\n"
+        "│   25-28: Moderate (small files)      │\n"
+        "└──────────────────────────────────────┘\n"
+        "\nEnter CRF value",
+        default=23,
+        show_default=True
+    )
 
         if 18 <= crf <= 28:
             return crf
